@@ -44,3 +44,6 @@ For quick testing, an `.xlsx` with an `IP Address` column containing a mix
 of known-clean DNS IPs, duplicates, invalid entries, and IPv6 addresses
 will exercise all the app's code paths (validation, dedup, clean/malicious
 classification, and error handling).
+
+#Link
+https://khadijaz8.github.io/Soulmate_cyber_VT3/
