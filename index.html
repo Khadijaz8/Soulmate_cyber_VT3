@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soulmate Cyber V2 | VirusTotal IP Scanner</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root {
+    --bg: #020609;
+    --panel: #061016;
+    --panel2: #081820;
+    --cyan: #00f6ff;
+    --cyan2: #00a8b5;
+    --green: #39ff88;
+    --red: #ff3158;
+    --amber: #ffc857;
+    --text: #d9faff;
+    --muted: #5d8390;
+    --line: #12343d;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background:
+        radial-gradient(circle at 50% -10%, rgba(0,246,255,.13), transparent 32%),
+        radial-gradient(circle at 0% 100%, rgba(57,255,136,.035), transparent 25%),
+        repeating-linear-gradient(0deg, rgba(0,246,255,.018) 0px, rgba(0,246,255,.018) 1px, transparent 1px, transparent 4px),
+        var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(rgba(0,246,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,246,255,.025) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: linear-gradient(to bottom, black, transparent 90%);
+    z-index: 0;
+}
+
+.wrap {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px 26px 40px;
+    position: relative;
+    z-index: 1;
+}
+
+.cyber-header {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, rgba(5,18,25,.97), rgba(2,8,12,.97));
+    border: 1px solid var(--cyan2);
+    border-radius: 2px;
+    padding: 20px 24px;
+    box-shadow: 0 0 22px rgba(0,246,255,.08), inset 0 0 30px rgba(0,246,255,.025);
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+}
+
+.cyber-header::after {
+    content: "SOULMATE // SECURE CONSOLE";
+    position: absolute;
+    right: 18px;
+    bottom: 7px;
+    color: rgba(0,246,255,.24);
+    font-size: 8px;
+    letter-spacing: 2px;
+}
+
+.header-row {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.header-left { flex: 4; }
+.header-right { flex: 1; min-width: 210px; }
+
+.brand {
+    color: var(--cyan);
+    font: 800 30px 'Orbitron', sans-serif;
+    letter-spacing: 2px;
+    text-shadow: 0 0 14px rgba(0,246,255,.65);
+}
+
+.subtitle {
+    color: #6da5b2;
+    font: 700 10px 'Share Tech Mono', monospace;
+    letter-spacing: 2px;
+    margin-top: 7px;
+}
+
+.system-status {
+    color: var(--green);
+    font: 800 10px 'Share Tech Mono', monospace;
+    text-align: right;
+    line-height: 1.8;
+    text-shadow: 0 0 8px rgba(57,255,136,.35);
+}
+
+.command-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #020b10;
+    border: 1px solid #12343d;
+    border-left: 3px solid #00f6ff;
+    padding: 9px 13px;
+    margin: 0 0 14px;
+    font: 9px 'Share Tech Mono', monospace;
+    color: #5f9aa7;
+    letter-spacing: 1px;
+}
+
+.command-bar .ready { color: var(--green); }
+
+.section {
+    color: var(--text);
+    font: 800 11px 'Orbitron', sans-serif;
+    letter-spacing: 1.8px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 9px;
+    margin: 18px 0 12px;
+    position: relative;
+}
+
+.section::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 82px;
+    height: 2px;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+}
+
+.section .num {
+    color: var(--cyan);
+    margin-right: 10px;
+    text-shadow: 0 0 8px rgba(0,246,255,.7);
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+@media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.kpi {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, rgba(6,22,29,.96), rgba(3,12,17,.96));
+    border: 1px solid #17434d;
+    border-radius: 2px;
+    min-height: 92px;
+    padding: 13px 15px;
+    box-shadow: inset 0 0 22px rgba(0,246,255,.025);
+}
+
+.kpi::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 35%;
+    height: 2px;
+    background: var(--cyan);
+    box-shadow: 0 0 10px var(--cyan);
+}
+
+.kpi::after {
+    content: "";
+    position: absolute;
+    right: 8px; bottom: 7px;
+    width: 22px; height: 22px;
+    border-right: 1px solid rgba(0,246,255,.35);
+    border-bottom: 1px solid rgba(0,246,255,.35);
+}
+
+.kpi-label {
+    color: #618895;
+    font: 800 8px 'Share Tech Mono', monospace;
+    letter-spacing: 1.8px;
+}
+
+.kpi-value {
+    font: 800 27px 'Orbitron', sans-serif;
+    margin-top: 8px;
+    text-shadow: 0 0 11px currentColor;
+}
+
+.cyan { color: var(--cyan); }
+.green { color: var(--green); }
+.red { color: var(--red); }
+.amber { color: var(--amber); }
+
+.main-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 28px;
+    margin-top: 6px;
+    align-items: start;
+}
+
+@media (max-width: 1000px) {
+    .main-grid { grid-template-columns: 1fr; }
+}
+
+.panel, .notice, .status {
+    background: linear-gradient(145deg, rgba(6,20,27,.97), rgba(3,11,16,.97));
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    box-shadow: inset 0 0 18px rgba(0,246,255,.018);
+}
+
+.panel { padding: 14px; }
+
+.meta {
+    color: #5f8996;
+    font: 700 9px 'Share Tech Mono', monospace;
+    letter-spacing: .8px;
+}
+
+.notice {
+    padding: 11px 13px;
+    color: #7fa9b4;
+    font: 9px/1.7 'Share Tech Mono', monospace;
+    margin-top: 8px;
+}
+
+.status {
+    color: var(--cyan);
+    font: 800 10px 'Share Tech Mono', monospace;
+    padding: 10px 13px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--cyan);
+    box-shadow: 0 0 12px rgba(0,246,255,.05);
+}
+
+.console {
+    position: relative;
+    background: linear-gradient(rgba(0,246,255,.018) 50%, transparent 50%), #010608;
+    background-size: 100% 4px;
+    border: 1px solid #17434d;
+    border-radius: 2px;
+    color: #83f7ff;
+    font: 10px/1.65 'Share Tech Mono', monospace;
+    min-height: 300px;
+    max-height: 410px;
+    overflow-y: auto;
+    padding: 15px;
+    white-space: pre-wrap;
+    box-shadow: inset 0 0 30px rgba(0,246,255,.035), 0 0 14px rgba(0,246,255,.025);
+}
+
+button, .file-drop {
+    font-family: 'Share Tech Mono', monospace;
+}
+
+button {
+    background: linear-gradient(180deg, #0a2028, #06131a);
+    color: #a9faff;
+    border: 1px solid #1b6572;
+    border-radius: 2px;
+    font: 800 10px 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+    min-height: 39px;
+    box-shadow: inset 0 0 14px rgba(0,246,255,.035), 0 0 0 rgba(0,246,255,0);
+    transition: all .15s ease;
+    cursor: pointer;
+    padding: 0 14px;
+}
+
+button:hover:not(:disabled) {
+    color: #ffffff;
+    border-color: var(--cyan);
+    box-shadow: 0 0 12px rgba(0,246,255,.22), inset 0 0 18px rgba(0,246,255,.08);
+    transform: translateY(-1px);
+}
+
+button:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+button.primary {
+    background: linear-gradient(90deg, #032b34, #06434d, #032b34);
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 14px rgba(0,246,255,.18), inset 0 0 18px rgba(0,246,255,.07);
+    text-shadow: 0 0 7px rgba(0,246,255,.65);
+    width: 100%;
+    height: 44px;
+    font-size: 11px;
+}
+
+button.primary:hover:not(:disabled) {
+    box-shadow: 0 0 22px rgba(0,246,255,.35), inset 0 0 22px rgba(0,246,255,.12);
+}
+
+.btn-row { display: flex; gap: 8px; margin-top: 8px; }
+.btn-row button { flex: 1; }
+
+.file-drop {
+    background: #040c12;
+    border: 1px dashed #1b6572;
+    border-radius: 2px;
+    padding: 18px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: border-color .15s ease;
+}
+
+.file-drop:hover, .file-drop.drag { border-color: var(--cyan); color: var(--cyan); }
+.file-drop input { display: none; }
+
+input[type="password"], input[type="text"], input[type="number"] {
+    width: 100%;
+    background: #02080d;
+    border: 1px solid #16434d;
+    border-radius: 2px;
+    color: #d9faff;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    padding: 9px 10px;
+    outline: none;
+}
+
+input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 9px rgba(0,246,255,.16);
+}
+
+.key-row { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; }
+.key-row input { flex: 1; }
+.key-row button.remove {
+    width: 39px; min-height: 39px; flex: none;
+    font-size: 14px; padding: 0;
+}
+
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+label.field-label {
+    display: block;
+    color: #618895;
+    font: 800 8px 'Share Tech Mono', monospace;
+    letter-spacing: 1.5px;
+    margin-bottom: 5px;
+}
+
+.progress-outer {
+    background: #050f14;
+    border: 1px solid #17434d;
+    border-radius: 2px;
+    height: 26px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-inner {
+    height: 100%;
+    width: 0%;
+    background: var(--cyan);
+    box-shadow: 0 0 10px rgba(0,246,255,.55);
+    transition: width .2s ease;
+}
+
+.progress-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: #041014;
+    font-weight: 800;
+    mix-blend-mode: difference;
+    color: #d9faff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+}
+
+th, td {
+    border: 1px solid #17434d;
+    padding: 7px 9px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+th {
+    background: #0d1322;
+    color: #19e6ff;
+    font-weight: 800;
+    position: sticky;
+    top: 0;
+}
+
+tr.MALICIOUS td.status-cell { background: #5a1422; color: #ffb3c0; }
+tr.SUSPICIOUS td.status-cell { background: #5a4210; color: #ffe2a3; }
+tr.CLEAN td.status-cell { color: var(--green); }
+tr.UNKNOWN td.status-cell { color: var(--muted); }
+
+.table-scroll {
+    overflow: auto;
+    max-height: 420px;
+    border: 1px solid #17434d;
+    border-radius: 2px;
+}
+
+details {
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 10px 13px;
+    margin-top: 10px;
+    color: #7fa9b4;
+}
+
+details summary {
+    cursor: pointer;
+    color: var(--cyan);
+    font-size: 10px;
+    letter-spacing: 1px;
+    font-weight: 800;
+}
+
+details[open] summary { margin-bottom: 10px; }
+
+.export-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
+@media (max-width: 700px) { .export-grid { grid-template-columns: 1fr; } }
+
+.footer {
+    border-top: 1px solid var(--line);
+    color: #456a74;
+    font: 8px 'Share Tech Mono', monospace;
+    margin-top: 25px;
+    padding-top: 11px;
+    letter-spacing: 1px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.alert {
+    padding: 10px 13px;
+    border-radius: 2px;
+    font-size: 10px;
+    letter-spacing: .5px;
+    margin-top: 8px;
+    border: 1px solid;
+}
+.alert-error { background: rgba(255,49,88,.08); border-color: var(--red); color: #ff9caa; }
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: #050f14; }
+::-webkit-scrollbar-thumb { background: #16434d; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="header-row">
+        <div class="header-left">
+            <div class="cyber-header">
+                <div class="brand">&#9670; SOULMATE CYBER V2</div>
+                <div class="subtitle">VIRUSTOTAL // IP REPUTATION // THREAT INTELLIGENCE // SECURE CONSOLE // SOC EDITION</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="cyber-header" style="height:100%;">
+                <div class="system-status">
+                    &#9679; SYSTEM ONLINE<br>
+                    <span id="clock"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="command-bar">
+        <span>[SECURE CHANNEL] :: VIRUSTOTAL API LINK ESTABLISHED</span>
+        <span class="ready">&#9679; READY</span>
+    </div>
+
+    <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi"><div class="kpi-label">TARGETS</div><div class="kpi-value cyan" id="kpiTotal">0</div></div>
+        <div class="kpi"><div class="kpi-label">SCANNED</div><div class="kpi-value cyan" id="kpiScanned">0</div></div>
+        <div class="kpi"><div class="kpi-label">MALICIOUS</div><div class="kpi-value red" id="kpiMalicious">0</div></div>
+        <div class="kpi"><div class="kpi-label">SUSPICIOUS</div><div class="kpi-value amber" id="kpiSuspicious">0</div></div>
+        <div class="kpi"><div class="kpi-label">CLEAN</div><div class="kpi-value green" id="kpiClean">0</div></div>
+        <div class="kpi"><div class="kpi-label">ERRORS</div><div class="kpi-value red" id="kpiErrors">0</div></div>
+    </div>
+
+    <div class="main-grid">
+
+        <!-- LEFT: CONTROLS -->
+        <div>
+            <div class="section"><span class="num">01</span>INPUT IP FILE</div>
+            <div class="file-drop" id="fileDrop">
+                <input type="file" id="fileInput" accept=".xlsx,.xls">
+                <span id="fileDropLabel">DRAG &amp; DROP OR CLICK TO UPLOAD EXCEL (.xlsx)</span>
+            </div>
+            <div class="panel" id="fileInfo" style="display:none; margin-top:8px;">
+                <div class="meta">INPUT FILE</div>
+                <div style="font:800 11px Consolas,monospace; color:#e8f1ff; margin-top:5px;" id="fileName"></div>
+                <div class="meta" style="margin-top:5px;" id="fileSize"></div>
+            </div>
+            <div class="notice">
+                REQUIRED EXCEL COLUMN<br>
+                <b style="color:#19e6ff;">IP Address</b><br>
+                IPv4 and IPv6 addresses are supported. Duplicate and invalid entries are skipped.
+            </div>
+
+            <div class="section"><span class="num">02</span>VIRUSTOTAL API KEYS</div>
+            <div class="meta" style="margin-bottom:8px;">MULTI-KEY ROTATION // MASKED CREDENTIALS</div>
+            <div id="keySlots"></div>
+            <div class="btn-row">
+                <button id="addKeyBtn">+ ADD API KEY</button>
+                <button id="clearKeysBtn">[ X ] CLEAR KEY SLOTS</button>
+            </div>
+            <div class="meta" style="margin-top:8px;" id="keyStats">ACTIVE KEY SLOTS // 3 &nbsp;&nbsp;|&nbsp;&nbsp; UNIQUE KEYS READY // 0 &nbsp;&nbsp;|&nbsp;&nbsp; MAX // 20</div>
+
+            <div class="section"><span class="num">03</span>SCAN SETTINGS</div>
+            <div class="settings-grid">
+                <div>
+                    <label class="field-label">KEY COOLDOWN (sec)</label>
+                    <input type="number" id="cooldownInput" min="0" max="120" value="15">
+                </div>
+                <div>
+                    <label class="field-label">RETRIES</label>
+                    <input type="number" id="retriesInput" min="0" max="10" value="3">
+                </div>
+            </div>
+
+            <div style="margin-top:14px;">
+                <button class="primary" id="startBtn">[ EXECUTE ] SCAN IP FILE</button>
+            </div>
+            <div id="startError"></div>
+        </div>
+
+        <!-- RIGHT: ENGINE -->
+        <div>
+            <div class="section"><span class="num">04</span>VIRUSTOTAL SCAN ENGINE</div>
+            <div class="status" id="statusBox">READY // WAITING FOR IP FILE + API KEY(S)</div>
+            <div class="progress-outer"><div class="progress-inner" id="progressInner"></div><div class="progress-text" id="progressText"></div></div>
+            <div class="console" id="consoleBox">SYSTEM ONLINE
+WAITING FOR IP EXCEL + VIRUSTOTAL API KEY(S)...</div>
+        </div>
+    </div>
+
+    <div class="section"><span class="num">05</span>SCAN RESULTS</div>
+    <div id="resultsArea">
+        <div class="meta">NO SCAN RESULTS AVAILABLE</div>
+    </div>
+
+    <div id="errorLogArea"></div>
+
+    <div id="exportArea"></div>
+
+    <div class="footer">
+        <span>SOULMATE CYBER V2 // VIRUSTOTAL IP REPUTATION SCANNER</span>
+        <span>IP INTELLIGENCE // MULTI-KEY ROTATION // EXCEL REPORTING</span>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const RESULT_COLUMNS = ["IP Address","Status","Risk Score","Risk Level","Detection Rate",
+    "Malicious","Suspicious","Harmless","Undetected","Timeout","Reputation","Organization",
+    "ASN","Country","Continent","Network","RIR","JARM","Tags","Last Analysis (UTC)","Scan Time (UTC)"];
+
+const ERROR_COLUMNS = ["IP Address","Error Type","HTTP Status","Error Message","Retry Count","Timestamp (UTC)"];
+
+const VT_BASE = "https://www.virustotal.com/api/v3/ip_addresses/";
+
+let state = {
+    uploadedFile: null,
+    workbookRows: [],
+    results: [],
+    errors: [],
+    logs: [],
+    total: 0, scanned: 0, malicious: 0, suspicious: 0, clean: 0, unknown: 0, errCount: 0,
+    duplicates: 0, invalid: 0,
+    scanning: false,
+    scanDone: false
+};
+
+let keySlotCount = 3;
+
+// ============================================================
+// CLOCK
+// ============================================================
+function pad(n){ return String(n).padStart(2,"0"); }
+function updateClock(){
+    const d = new Date();
+    const s = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    document.getElementById("clock").textContent = s;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// ============================================================
+// KEY SLOTS UI
+// ============================================================
+function renderKeySlots(){
+    const container = document.getElementById("keySlots");
+    container.innerHTML = "";
+    for (let i = 1; i <= keySlotCount; i++){
+        const row = document.createElement("div");
+        row.className = "key-row";
+        const input = document.createElement("input");
+        input.type = "password";
+        input.placeholder = "Paste VirusTotal API key";
+        input.dataset.slot = i;
+        input.className = "vt-key-input";
+        input.addEventListener("input", updateKeyStats);
+        const rm = document.createElement("button");
+        rm.className = "remove";
+        rm.textContent = "\u00D7";
+        rm.disabled = keySlotCount === 1;
+        rm.title = "Remove API key " + i;
+        rm.addEventListener("click", () => {
+            keySlotCount = Math.max(1, keySlotCount - 1);
+            renderKeySlots();
+        });
+        row.appendChild(input);
+        row.appendChild(rm);
+        container.appendChild(row);
+    }
+    updateKeyStats();
+}
+
+function getEnteredKeys(){
+    const inputs = document.querySelectorAll(".vt-key-input");
+    const entered = [];
+    inputs.forEach(inp => { if (inp.value.trim()) entered.push(inp.value.trim()); });
+    return [...new Set(entered)];
+}
+
+function updateKeyStats(){
+    const unique = getEnteredKeys();
+    document.getElementById("keyStats").textContent =
+        `ACTIVE KEY SLOTS // ${keySlotCount}  |  UNIQUE KEYS READY // ${unique.length}  |  MAX // 20`;
+}
+
+document.getElementById("addKeyBtn").addEventListener("click", () => {
+    if (keySlotCount < 20){ keySlotCount++; renderKeySlots(); }
+});
+document.getElementById("clearKeysBtn").addEventListener("click", () => {
+    keySlotCount = 3;
+    renderKeySlots();
+});
+renderKeySlots();
+
+// ============================================================
+// FILE UPLOAD
+// ============================================================
+const fileDrop = document.getElementById("fileDrop");
+const fileInput = document.getElementById("fileInput");
+
+fileDrop.addEventListener("click", () => fileInput.click());
+fileDrop.addEventListener("dragover", e => { e.preventDefault(); fileDrop.classList.add("drag"); });
+fileDrop.addEventListener("dragleave", () => fileDrop.classList.remove("drag"));
+fileDrop.addEventListener("drop", e => {
+    e.preventDefault();
+    fileDrop.classList.remove("drag");
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", e => {
+    if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(file){
+    state.uploadedFile = file;
+    document.getElementById("fileDropLabel").textContent = "FILE SELECTED — CLICK TO REPLACE";
+    document.getElementById("fileInfo").style.display = "block";
+    document.getElementById("fileName").textContent = file.name;
+    document.getElementById("fileSize").textContent = `SIZE // ${(file.size/1024).toFixed(1)} KB`;
+}
+
+// ============================================================
+// IP VALIDATION
+// ============================================================
+function normalizeIp(raw){
+    if (raw === null || raw === undefined) return null;
+    const text = String(raw).trim();
+    if (!text || ["nan","none","null"].includes(text.toLowerCase())) return null;
+
+    // IPv4
+    const v4 = text.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (v4){
+        const parts = v4.slice(1).map(Number);
+        if (parts.every(p => p >= 0 && p <= 255)) return parts.join(".");
+        return null;
+    }
+
+    // IPv6 (basic validation via URL API trick)
+    if (text.includes(":")){
+        try {
+            const u = new URL("http://[" + text + "]");
+            if (u.hostname) return text.toLowerCase();
+        } catch(e){ return null; }
+    }
+    return null;
+}
+
+// ============================================================
+// LOGGING / STATUS / KPI / PROGRESS
+// ============================================================
+function addLog(message, level="INFO"){
+    const d = new Date();
+    const ts = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    state.logs.push(`[${ts}] ${level.padEnd(5)} // ${message}`);
+    renderConsole();
+}
+
+function renderConsole(){
+    const box = document.getElementById("consoleBox");
+    const text = state.logs.length
+        ? state.logs.slice(-120).join("\n")
+        : "SYSTEM ONLINE\nWAITING FOR IP EXCEL + VIRUSTOTAL API KEY(S)...";
+    box.textContent = text;
+    box.scrollTop = box.scrollHeight;
+}
+
+function setStatus(text, color){
+    const box = document.getElementById("statusBox");
+    box.textContent = text;
+    box.style.color = color || "#19e6ff";
+    box.style.borderLeftColor = color || "#00f6ff";
+}
+
+function renderKpis(){
+    document.getElementById("kpiTotal").textContent = state.total;
+    document.getElementById("kpiScanned").textContent = state.scanned;
+    document.getElementById("kpiMalicious").textContent = state.malicious;
+    document.getElementById("kpiSuspicious").textContent = state.suspicious;
+    document.getElementById("kpiClean").textContent = state.clean;
+    document.getElementById("kpiErrors").textContent = state.errCount;
+}
+
+function setProgress(fraction, text){
+    document.getElementById("progressInner").style.width = (fraction*100) + "%";
+    document.getElementById("progressText").textContent = text;
+}
+
+function maskKey(key){
+    if (key.length <= 10) return "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022";
+    return key.slice(0,6) + "\u2022\u2022\u2022\u2022" + key.slice(-4);
+}
+
+// ============================================================
+// RISK CLASSIFICATION
+// ============================================================
+function classifyRisk(malicious, suspicious, reputation){
+    malicious = malicious || 0;
+    suspicious = suspicious || 0;
+    reputation = reputation || 0;
+
+    if (malicious >= 10 || reputation <= -20) return [95, "CRITICAL"];
+    if (malicious >= 5 || reputation <= -5) return [80, "HIGH"];
+    if (malicious > 0 || suspicious >= 3 || reputation < 0) return [60, "MEDIUM"];
+    if (suspicious > 0) return [35, "LOW"];
+    return [0, "CLEAN"];
+}
+
+function utcFromEpoch(value){
+    if (!value) return "Unknown";
+    try {
+        const d = new Date(value * 1000);
+        return d.toISOString().replace("T"," ").split(".")[0] + " UTC";
+    } catch(e){ return "Unknown"; }
+}
+
+function nowUtcString(){
+    return new Date().toISOString().replace("T"," ").split(".")[0] + " UTC";
+}
+
+function sleep(ms){ return new Promise(res => setTimeout(res, ms)); }
+
+// ============================================================
+// VIRUSTOTAL QUERY (with retry/backoff)
+// ============================================================
+async function queryVt(ip, apiKey, retries){
+    const url = VT_BASE + encodeURIComponent(ip);
+    let lastError = "Unknown error";
+
+    for (let attempt = 0; attempt <= retries; attempt++){
+        let response;
+        try {
+            response = await fetch(url, {
+                method: "GET",
+                headers: { "accept": "application/json", "x-apikey": apiKey }
+            });
+        } catch (networkErr){
+            lastError = "Network/CORS error: " + networkErr.message;
+            if (attempt < retries){ await sleep(Math.min(2**attempt*2000, 20000)); continue; }
+            break;
+        }
+
+        const status = response.status;
+
+        if (status === 200){
+            const json = await response.json();
+            const attrs = (json.data && json.data.attributes) || {};
+            const stats = attrs.last_analysis_stats || {};
+
+            const malicious = Number(stats.malicious || 0);
+            const suspicious = Number(stats.suspicious || 0);
+            const harmless = Number(stats.harmless || 0);
+            const undetected = Number(stats.undetected || 0);
+            const timeoutCount = Number(stats.timeout || 0);
+            const total = malicious + suspicious + harmless + undetected + timeoutCount;
+            const reputation = Number(attrs.reputation || 0);
+
+            const [score, risk] = classifyRisk(malicious, suspicious, reputation);
+
+            let statusLabel;
+            if (malicious > 0) statusLabel = "MALICIOUS";
+            else if (suspicious > 0) statusLabel = "SUSPICIOUS";
+            else if (total === 0) statusLabel = "UNKNOWN";
+            else statusLabel = "CLEAN";
+
+            const row = {
+                "IP Address": ip,
+                "Status": statusLabel,
+                "Risk Score": score,
+                "Risk Level": risk,
+                "Detection Rate": `${malicious}/${total}`,
+                "Malicious": malicious,
+                "Suspicious": suspicious,
+                "Harmless": harmless,
+                "Undetected": undetected,
+                "Timeout": timeoutCount,
+                "Reputation": reputation,
+                "Organization": attrs.as_owner || "Unknown",
+                "ASN": attrs.asn || "Unknown",
+                "Country": attrs.country || "Unknown",
+                "Continent": attrs.continent || "Unknown",
+                "Network": attrs.network || "Unknown",
+                "RIR": attrs.regional_internet_registry || "Unknown",
+                "JARM": attrs.jarm || "Unknown",
+                "Tags": (attrs.tags && attrs.tags.length) ? attrs.tags.join(", ") : "None",
+                "Last Analysis (UTC)": utcFromEpoch(attrs.last_analysis_date),
+                "Scan Time (UTC)": nowUtcString()
+            };
+            return [row, null];
+        }
+
+        if (status === 401){
+            return [null, { error_type: "INVALID_API_KEY", http_status: 401, message: "VirusTotal rejected the API key", retry: attempt }];
+        }
+
+        if (status === 404){
+            const row = {};
+            RESULT_COLUMNS.forEach(c => row[c] = "Unknown");
+            row["IP Address"] = ip;
+            row["Status"] = "UNKNOWN";
+            row["Risk Score"] = 0;
+            row["Risk Level"] = "UNKNOWN";
+            row["Detection Rate"] = "0/0";
+            row["Scan Time (UTC)"] = nowUtcString();
+            return [row, null];
+        }
+
+        if (status === 429){
+            lastError = "HTTP 429 - rate limited";
+            if (attempt < retries){
+                const wait = Math.min(60*(attempt+1), 180) * 1000;
+                addLog(`RATE LIMIT // ${maskKey(apiKey)} // BACKOFF ${wait/1000}s`, "WARN");
+                await sleep(wait);
+                continue;
+            }
+            return [null, { error_type: "RATE_LIMIT", http_status: 429, message: lastError, retry: attempt }];
+        }
+
+        if ([408,500,502,503,504].includes(status)){
+            lastError = "HTTP " + status;
+            if (attempt < retries){
+                const wait = Math.min(2**attempt*3, 30) * 1000;
+                addLog(`TRANSIENT ERROR // HTTP ${status} // RETRY ${attempt+1}/${retries}`, "WARN");
+                await sleep(wait);
+                continue;
+            }
+        }
+
+        let bodyText = "";
+        try { bodyText = (await response.text()).slice(0,500); } catch(e){}
+        return [null, { error_type: "HTTP_ERROR", http_status: status, message: bodyText || ("HTTP " + status), retry: attempt }];
+    }
+
+    return [null, { error_type: "REQUEST_ERROR", http_status: "N/A", message: lastError, retry: retries }];
+}
+
+// ============================================================
+// EXCEL EXPORT (SheetJS)
+// ============================================================
+function buildWorkbookBlob(rows, columns, sheetName){
+    const ws = XLSX.utils.json_to_sheet(rows, { header: columns });
+    // Column widths
+    ws["!cols"] = columns.map(c => ({ wch: Math.min(Math.max(c.length + 2, 12), 42) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    return new Blob([wbout], { type: "application/octet-stream" });
+}
+
+function downloadBlob(blob, filename){
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+async function buildZipBlob(ipBlob, errorBlob){
+    const zip = new JSZip();
+    zip.file("IP_Results.xlsx", ipBlob);
+    zip.file("Error_Results.xlsx", errorBlob);
+    return await zip.generateAsync({ type: "blob" });
+}
+
+// ============================================================
+// RESULTS / ERROR RENDERING
+// ============================================================
+function renderResults(){
+    const area = document.getElementById("resultsArea");
+    if (!state.results.length){
+        area.innerHTML = '<div class="meta">NO SCAN RESULTS AVAILABLE</div>';
+        return;
+    }
+    const previewCols = ["IP Address","Status","Risk Level","Detection Rate","ASN","Country","Organization"];
+
+    let html = '<div class="table-scroll"><table><thead><tr>';
+    previewCols.forEach(c => html += `<th>${c}</th>`);
+    html += '</tr></thead><tbody>';
+    state.results.forEach(r => {
+        html += `<tr class="${r.Status}">`;
+        previewCols.forEach((c,i) => {
+            const cls = i === 1 ? ' class="status-cell"' : '';
+            html += `<td${cls}>${escapeHtml(String(r[c]))}</td>`;
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+
+    html += '<details><summary>[ + ] VIEW FULL TELEMETRY</summary><div class="table-scroll"><table><thead><tr>';
+    RESULT_COLUMNS.forEach(c => html += `<th>${c}</th>`);
+    html += '</tr></thead><tbody>';
+    state.results.forEach(r => {
+        html += `<tr class="${r.Status}">`;
+        RESULT_COLUMNS.forEach((c,i) => {
+            const cls = i === 1 ? ' class="status-cell"' : '';
+            html += `<td${cls}>${escapeHtml(String(r[c]))}</td>`;
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table></div></details>';
+
+    area.innerHTML = html;
+}
+
+function renderErrorLog(){
+    const area = document.getElementById("errorLogArea");
+    if (!state.errors.length){ area.innerHTML = ""; return; }
+    let html = '<details><summary>[ ! ] SCAN ERROR LOG</summary><div class="table-scroll"><table><thead><tr>';
+    ERROR_COLUMNS.forEach(c => html += `<th>${c}</th>`);
+    html += '</tr></thead><tbody>';
+    state.errors.forEach(r => {
+        html += '<tr>';
+        ERROR_COLUMNS.forEach(c => html += `<td>${escapeHtml(String(r[c]))}</td>`);
+        html += '</tr>';
+    });
+    html += '</tbody></table></div></details>';
+    area.innerHTML = html;
+}
+
+function escapeHtml(str){
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function renderExportCenter(ipBlob, errorBlob, zipBlob){
+    const area = document.getElementById("exportArea");
+    area.innerHTML = `
+        <div class="section"><span class="num">06</span>EXPORT CENTER</div>
+        <div class="notice">SCAN COMPLETE // REPORTS HAVE BEEN GENERATED. Download individual reports or the complete result package.</div>
+        <div class="export-grid">
+            <button id="dlIp">[ &#8595; ] IP RESULTS</button>
+            <button id="dlErr">[ &#8595; ] ERROR LOG</button>
+            <button id="dlZip">[ &#8595; ] FULL PACKAGE</button>
+        </div>
+    `;
+    document.getElementById("dlIp").addEventListener("click", () => downloadBlob(ipBlob, "IP_Results.xlsx"));
+    document.getElementById("dlErr").addEventListener("click", () => downloadBlob(errorBlob, "Error_Results.xlsx"));
+    document.getElementById("dlZip").addEventListener("click", () => downloadBlob(zipBlob, "Soulmate_VT_Results.zip"));
+}
+
+// ============================================================
+// MAIN SCAN
+// ============================================================
+function resetState(){
+    state.results = [];
+    state.errors = [];
+    state.logs = [];
+    state.total = 0; state.scanned = 0; state.malicious = 0; state.suspicious = 0;
+    state.clean = 0; state.unknown = 0; state.errCount = 0; state.duplicates = 0; state.invalid = 0;
+    state.scanDone = false;
+    renderKpis();
+    renderConsole();
+    document.getElementById("resultsArea").innerHTML = '<div class="meta">NO SCAN RESULTS AVAILABLE</div>';
+    document.getElementById("errorLogArea").innerHTML = "";
+    document.getElementById("exportArea").innerHTML = "";
+    setProgress(0, "");
+}
+
+async function readIpsFromFile(file){
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+    if (!rows.length) throw new Error("The uploaded sheet is empty.");
+
+    const headerKey = Object.keys(rows[0]).find(k => k.trim() === "IP Address");
+    if (!headerKey) throw new Error("Required column 'IP Address' was not found.");
+
+    return rows.map(r => r[headerKey]);
+}
+
+document.getElementById("startBtn").addEventListener("click", async () => {
+    if (state.scanning) return;
+    document.getElementById("startError").innerHTML = "";
+
+    if (!state.uploadedFile){
+        document.getElementById("startError").innerHTML = '<div class="alert alert-error">Upload the IP Excel file first.</div>';
+        return;
+    }
+    const apiKeys = getEnteredKeys();
+    if (!apiKeys.length){
+        document.getElementById("startError").innerHTML = '<div class="alert alert-error">Enter at least one VirusTotal API key.</div>';
+        return;
+    }
+
+    const cooldown = Number(document.getElementById("cooldownInput").value) || 0;
+    const retries = Number(document.getElementById("retriesInput").value) || 0;
+
+    resetState();
+    state.scanning = true;
+    document.getElementById("startBtn").disabled = true;
+
+    setStatus("INITIALIZING // VALIDATING INPUT");
+    setProgress(0, "SCAN PROGRESS // INITIALIZING");
+
+    addLog(`INPUT // ${state.uploadedFile.name}`, "INFO");
+    addLog(`API INVENTORY // ${apiKeys.length} UNIQUE KEY(S)`, "INFO");
+
+    try {
+        const rawIps = await readIpsFromFile(state.uploadedFile);
+
+        const seen = new Set();
+        const targets = [];
+        rawIps.forEach(raw => {
+            const ip = normalizeIp(raw);
+            if (!ip){ state.invalid++; return; }
+            if (seen.has(ip)){ state.duplicates++; return; }
+            seen.add(ip);
+            targets.push(ip);
+        });
+
+        state.total = targets.length;
+        renderKpis();
+
+        if (!targets.length){
+            throw new Error("No valid IP addresses were found in 'IP Address'.");
+        }
+
+        addLog(`TARGETS // ${targets.length} VALID UNIQUE IP(S)`, "GOOD");
+        addLog(`SKIPPED // INVALID ${state.invalid} // DUPLICATES ${state.duplicates}`, "INFO");
+
+        const invalidKeys = new Set();
+        const lastUsed = {};
+        apiKeys.forEach(k => lastUsed[k] = 0);
+
+        for (let i = 0; i < targets.length; i++){
+            const ip = targets[i];
+
+            let available = apiKeys.filter(k => !invalidKeys.has(k));
+            if (!available.length) throw new Error("No valid VirusTotal API keys remain.");
+
+            let key;
+            while (true){
+                available = apiKeys.filter(k => !invalidKeys.has(k));
+                if (!available.length) throw new Error("No valid VirusTotal API keys remain.");
+                key = available.reduce((a,b) => lastUsed[a] <= lastUsed[b] ? a : b);
+                const elapsed = (Date.now() - lastUsed[key]) / 1000;
+                const waitTime = cooldown - elapsed;
+                if (waitTime <= 0) break;
+                await sleep(Math.min(waitTime, 0.5) * 1000);
+            }
+            lastUsed[key] = Date.now();
+
+            setStatus(`SCANNING ${i+1}/${targets.length} // ${ip} // KEY ${maskKey(key)}`);
+            addLog(`[${i+1}/${targets.length}] QUERY // ${ip}`, "INFO");
+
+            let [result, error] = await queryVt(ip, key, retries);
+
+            if (error && error.error_type === "INVALID_API_KEY"){
+                invalidKeys.add(key);
+                addLog(`INVALID API KEY // ${maskKey(key)} // ROTATING`, "ERROR");
+                const replacementKeys = apiKeys.filter(k => !invalidKeys.has(k));
+                if (replacementKeys.length){
+                    const replacement = replacementKeys.reduce((a,b) => lastUsed[a] <= lastUsed[b] ? a : b);
+                    lastUsed[replacement] = Date.now();
+                    [result, error] = await queryVt(ip, replacement, retries);
+                }
+            }
+
+            if (result){
+                state.results.push(result);
+                const st = result["Status"];
+                if (st === "MALICIOUS"){
+                    state.malicious++;
+                    addLog(`THREAT DETECTED // ${ip} // ${result["Detection Rate"]} // ${result["Risk Level"]}`, "ERROR");
+                } else if (st === "SUSPICIOUS"){
+                    state.suspicious++;
+                    addLog(`SUSPICIOUS // ${ip} // ${result["Detection Rate"]}`, "WARN");
+                } else if (st === "CLEAN"){
+                    state.clean++;
+                    addLog(`CLEAN // ${ip} // ${result["Detection Rate"]}`, "GOOD");
+                } else {
+                    state.unknown++;
+                    addLog(`UNKNOWN // ${ip}`, "WARN");
+                }
+            } else {
+                state.errCount++;
+                error = error || {};
+                state.errors.push({
+                    "IP Address": ip,
+                    "Error Type": error.error_type || "ERROR",
+                    "HTTP Status": error.http_status !== undefined ? error.http_status : "N/A",
+                    "Error Message": error.message || "Unknown error",
+                    "Retry Count": error.retry !== undefined ? error.retry : 0,
+                    "Timestamp (UTC)": nowUtcString()
+                });
+                addLog(`ERROR // ${ip} // ${error.error_type || "ERROR"}`, "ERROR");
+            }
+
+            state.scanned++;
+            renderKpis();
+            setProgress(state.scanned/targets.length, `SCAN PROGRESS // ${state.scanned}/${targets.length}`);
+            renderConsole();
+        }
+
+        const ipBlob = buildWorkbookBlob(state.results, RESULT_COLUMNS, "IP RESULTS");
+        const errorBlob = buildWorkbookBlob(state.errors, ERROR_COLUMNS, "ERROR RESULTS");
+        const zipBlob = await buildZipBlob(ipBlob, errorBlob);
+
+        state.scanDone = true;
+        addLog(`SCAN COMPLETE // ${state.scanned} PROCESSED`, "GOOD");
+        renderKpis();
+        setProgress(1, "SCAN COMPLETE // 100%");
+        setStatus("COMPLETE // REPORTS READY FOR EXPORT", "#39ff88");
+        renderConsole();
+        renderResults();
+        renderErrorLog();
+        renderExportCenter(ipBlob, errorBlob, zipBlob);
+
+    } catch (exc){
+        addLog(`FATAL // ${exc.message}`, "ERROR");
+        setStatus("HALTED // REVIEW ERROR", "#ff4d6d");
+        renderConsole();
+        document.getElementById("startError").innerHTML = `<div class="alert alert-error">${escapeHtml(exc.message)}</div>`;
+    } finally {
+        state.scanning = false;
+        document.getElementById("startBtn").disabled = false;
+    }
+});
+</script>
+</body>
+</html>
